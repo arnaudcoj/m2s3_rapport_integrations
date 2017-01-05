@@ -117,7 +117,7 @@ La direction (ou orientation) de la force correspond à :
 \begin{equation}
   d = \frac{pos_B - pos_A}{norm(pos_B - pos_A)}
 \end{equation}
-où $pos_X$ correspond à la position du point X, et $norm(vect)$ correspond au vecteur vect normalisé.
+où $pos_X$ correspond à la position du point X, et $norm(vect)$ correspond au vecteur vect normalisé.\\
 
 La force appliquée par le ressort sur le point correspond à :
 \begin{equation}
@@ -130,11 +130,11 @@ L'accélération du point à l'instant t correspond donc à :
   a_t = \frac{P + R}{m} = \frac{P}{m} + \frac{R}{m} = g + \frac{vn_R * d}{m}
 \end{equation}
 
-Il faut faire attention à calculer et conserver la valeur initiale de la longueur d'un segment/ressort, et recalculer à chaque pas de temps la longueur actuelle du ressort.\\
+Il faut faire attention à calculer et conserver la valeur initiale de la longueur d'un segment/ressort, et recalculer à chaque pas de temps la longueur actuelle du ressort.
 
 \subsection{Observations}
 
-On observe que si l'on fixe un des bords du solide, une déformation se propage le long de celui-ci pendant la chute.
+On observe que si l'on fixe un des bords du solide, une déformation se propage le long de celui-ci pendant la chute.\\
 
 En faisant varier le pas de temps $dt$, on constate qu'il ne doit pas être trop grand, sinon l'objet "explose".
 
@@ -145,31 +145,31 @@ L'intégration implicite fonctionne d'une façon similaire à l'intégration exp
 
 \subsection{Euler implicite}
 
-La position et la vitesse sont calculées de la même façon que dans {\em Euler explicite}.
+La position et la vitesse sont calculées de la même façon que dans {\em Euler explicite}.\\
 
 L'accelération d'un point à l'instant t correspond à :
 \begin{equation}
   m * a_t = m * G + Fk(p_t)
 \end{equation}
-où $G$ correspond à la valeur de la gravité (en général 9,81) et $m$ correspond à la masse de l'objet. $Fk$ correspond à une fonction qui calcule la force générée par les ressorts à partir de la position.
+où $G$ correspond à la valeur de la gravité (en général 9,81) et $m$ correspond à la masse de l'objet. $Fk$ correspond à une fonction qui calcule la force générée par les ressorts à partir de la position.\\
 
 L'accélération du point à l'instant t correspond également à :
 \begin{equation}
   a_t = \frac{dv}{dt} = v_t - v_{t-1}
 \end{equation}
-où $dv =$ variable commune liant l'accélération et la position, $dt =$ pas de temps, $v_t =$ vitesse du point à l'instant t, $v_{t-1} =$ vitesse du point à l'instant t-1,.
+où $dv =$ variable commune liant l'accélération et la position, $dt =$ pas de temps, $v_t =$ vitesse du point à l'instant t, $v_{t-1} =$ vitesse du point à l'instant t-1.\\
 
 La position du point à l'instant t correspond également à :
 \begin{equation}
   p_t = p_{t-1} + v_{t-1} + dv
 \end{equation}
-où $p_{t-1} =$ position du point à l'instant t-1, $v_{t-1} =$ vitesse du point à l'instant t-1, $dv =$ variable commune liant l'accélération et la position.
+où $p_{t-1} =$ position du point à l'instant t-1, $v_{t-1} =$ vitesse du point à l'instant t-1, $dv =$ variable commune liant l'accélération et la position.\\
 
 On dispose donc d'une fonction non-linéaire :
 \begin{equation}
   Fnl(dv) = \frac{m * dv}{dt} - m * G - Fk( p_{t-1} + v_{t-1} + dv )
 \end{equation}
-où $m$ correspond à la masse de l'objet, $dv =$ variable commune liant l'accélération et la position, $dt =$ pas de temps, $G$ correspond à la valeur de la gravité (en général 9,81), $Fk$ correspond à une fonction qui calcule la force générée par les ressorts à partir de la position, $p_{t-1} =$ position du point à l'instant t-1, $v_{t-1} =$ vitesse du point à l'instant t-1.
+où $m$ correspond à la masse de l'objet, $dv =$ variable commune liant l'accélération et la position, $dt =$ pas de temps, $G$ correspond à la valeur de la gravité (en général 9,81), $Fk$ correspond à une fonction qui calcule la force générée par les ressorts à partir de la position, $p_{t-1} =$ position du point à l'instant t-1, $v_{t-1} =$ vitesse du point à l'instant t-1.\\
 
 Pour résoudre cette équation, il faut utiliser un solveur.
 \begin{equation}
@@ -188,26 +188,27 @@ Le choix du pas de temps influence donc peu sur le résultat. De même une modif
 %----------------------------------------------------------------------------------------
 \section{Gestion des contacts}
 
-On veut implémenter une réponse à la collision entre un objet en chute libre et un plan représentant une surface rigide et statique.
+On veut implémenter une réponse à la collision entre un objet en chute libre et un plan représentant une surface rigide et statique.\\
 
-Une implémentation possible est celle de la méthode de pénalité. Cette méthode est utilisable avec les intégrations implicites et explicites.
+Une implémentation possible est celle de la méthode de pénalité. Cette méthode est utilisable avec les intégrations implicites et explicites.\\
 
 Une pénalité correspond à une force appliquée sur un objet pour le repousser, lorsqu'une collision est détectée (dépassement du plan dans notre cas).
 
 \subsection{Pénalités}
 
-On calcule la masse du disque calculée, puis on applique la force de gravité sur celui-ci.
+On calcule la masse du disque calculée, puis on applique la force de gravité sur celui-ci.\\
+
 Une fois que l'on détecte que l'objet dépasse le plan, on ajoute la force de pénalité :
 \begin{equation}
   Pe = -k * distance(p_X, plan_X)
 \end{equation}
-où $k$ correspond au coefficient de résistance du ressort, $p_X$ correspond à la position du point X, et $plan_X$ correspond à la projection orthogonale du point X sur le plan.
+où $k$ correspond au coefficient de résistance du ressort, $p_X$ correspond à la position du point X, et $plan_X$ correspond à la projection orthogonale du point X sur le plan.\\
 
 Pour éviter à l'objet de rebondir de façon infinie, on ajoute à cette force un amortissement :
 \begin{equation}
   Pe = -k * distance(p_X, plan_X) - b * v_{t-1}
 \end{equation}
-où $b$ correspond au coefficient de frottement, et $v_{t-1}$ correspond à la vitesse du point à l'instant t-1.
+où $b$ correspond au coefficient de frottement, et $v_{t-1}$ correspond à la vitesse du point à l'instant t-1.\\
 
 Cette force sera ajoutée aux forces utilisées dans les intégrations vues précédemments.
 
