@@ -63,45 +63,130 @@
 
 Dans ce rapport nous nous intéresserons aux méthodes d'intégrations de forces. Nous aborderons les modèles masse-ressort en intégration explicite et implicite, ainsi que la gestion de contacts.
 
-\clearpage
-\section{bordel}
+\section{Intégration explicite}
 
-on a compris que 
+Pour implémenter un modèle massee-ressort avec intégration temporelle explicite, il faut définir l'accélération et la vitesse des points et utiliser le schéma d'intégration {\em Euler explicite}.
 
-dt est le pas de temps
-la position correspond à la position initiale + la vitesse * dt
-la vitesse est augmentée à chaque tour par l'acceleration * dt
-L'acceleration correspond à la somme des forces divisée par la masse
+\subsection{Euler explicite}
 
-La somme des forces appliquées à un point correspond ici au poids + la force du ressort
-Poids = m * g
+La position d'un point à l'instant t correspond à :
+\begin{equation}
+  p_t = p_{t-1} + v_t * dt
+\end{equation}
+où $p_t =$ position du point à l'instant t, $p_{t-1} =$ position du point à l'instant t-1, $v_t =$ vitesse du point à l'instant t, $dt =$ pas de temps.\\
 
-valeurNominaleForce = k * (longueur - longueurInitiale)
-direction = (pos_b - pos_a) / norm(pos_b - pos_a)
-k = coefficient de résistance du ressort
-Force_ressort = valeurNominaleForce * direction
-on doit donc calculer et conserver la valeur initiale de la longueur d'un segment/ressort, puis à chaque pas de temps recalculer la longueur
+La vitesse d'un point à l'instant t correspond à :
+\begin{equation}
+  v_t = v_{t-1} + a_t * dt
+\end{equation}
+où $v_t =$ vitesse du point à l'instant t, $v_{t-1} =$ vitesse du point à l'instant t-1, $a_t =$ accéleration du point à l'instant t, $dt =$ pas de temps.\\
 
-on constate une propagation numérique de la déformation due au ressort
-Il ne faut pas mettre un dt trop grand sinon la force explose
+L'accelération d'un point à l'instant t correspond à :
+\begin{equation}
+  a_t = \frac{\sum F}{m}
+\end{equation}
+où $\sum F$ correspond à la somme des forces appliquées sur le point et $m$ correspond à la masse de l'objet représenté par le point.
 
-fonction non linéaire prend dv en paramètre. Utilise un solveur pour résoudre l'équation.
-Prend plus de temps à résoudre mais plus stable
+\subsection{Cas de la chute libre}
 
-choix du pas de temps influence peu sur le résultat
-peut augmenter constantes comme la raideur et reste stable
+Dans le cas de la chute libre, comme il n'y a que la gravité qui s'applique sur l'objet, on peut simplifier l'équation $a_t = \sum \frac{F}{m}$ en :
+\begin{equation}
+  a_t = \frac{P}{m} = \frac{G * m}{m} = G
+\end{equation}
+où $P$ correspond au poids de l'objet, dont la formule est $G * m$, où $G$ correspond à la valeur de la gravité (en général 9,81) et $m$ correspond à la masse de l'objet.
 
-pénalité : quand dépasse une limite (devrait y'avoir une collision), on applique une force qui repousse l'objet
+\subsection{Ajout de ressorts}
 
-on peut le faire en explicite ou implicite
+L'ajout de ressorts permet à l'objet de se déformer lorsqu'il tombe en ayant des points fixes.\\
 
-pour l'explicite on fait un cas où c'est rigide
-on a calculé la masse du disque puis appliqué une force de gravité sur tous les points du maillage
-puis une fois qu'on détecte que l'objet a dépassé le plan on ajoute la force de pénalité FC += -k * distance_du_point_au_plan
-On intègre ça de façon explicite comme vu au premier tp
+La somme des forces appliquées à un point correspond ici à :
+\begin{equation}
+  a_t = \frac{P + R}{m}
+\end{equation}
+où $P$ correspond au poids de l'objet, $R$ correspond à la force du ressort, $m$ la masse de l'objet.
 
-On ajoute à ça un amortissement car rebondit à l'infini sinon : FC += -k * distance_point_au_plan - v * vitesse
+Pour obtenir la force appliquée par le ressort sur le point, il nous faut la valeur nominale de la force, et la direction dans laquelle la force est orientée.\\
+
+La valeur nominale de la force correspond à :
+\begin{equation}
+  vn_R = k * (l - l_0)
+\end{equation}
+où $k$ correspond au coefficient de résistance du ressort, $l$ correspond à la longueur actuelle du ressort et $l_0$ sa longueur initiale.\\
+
+La direction (ou orientation) de la force correspond à :
+\begin{equation}
+  d = \frac{pos_B - pos_A}{norm(pos_B - pos_A)}
+\end{equation}
+où $pos_X$ correspond à la position du point X, et $norm(vect)$ correspond au vecteur vect normalisé.
+
+La force appliquée par le ressort sur le point correspond à :
+\begin{equation}
+  R = vn_R * d
+\end{equation}
+où $vn_R$ correspond à la force nominale (voir ci-dessus) et d correspond à l'orientation de la force (voir ci-dessus).\\
+
+L'accélération du point à l'instant t correspond donc à :
+\begin{equation}
+  a_t = \frac{P + R}{m} = \frac{P}{m} + \frac{R}{m} = g + \frac{vn_R * d}{m}
+\end{equation}
+
+Il faut faire attention à calculer et conserver la valeur initiale de la longueur d'un segment/ressort, et recalculer à chaque pas de temps la longueur actuelle du ressort.\\
+
+\subsection{Observations}
+
+On observe que si l'on fixe un des bords du solide, une déformation se propage le long de celui-ci pendant la chute.
+
+En faisant varier le pas de temps $dt$, on constate qu'il ne doit pas être trop grand, sinon l'objet "explose".
 
 %----------------------------------------------------------------------------------------
+\section{Intégration implicite}
+
+L'intégration implicite fonctionne d'une façon similaire à l'intégration explicite. Il faut appliquer ici le schéma {\em Euler implicite}. L'intérêt est d'avoir une simulation plus stable (pas "d'explosion").\\
+
+\subsection{Euler implicite}
+
+La position et la vitesse sont calculées de la même façon que dans {\em Euler explicite}.
+
+L'accelération d'un point à l'instant t correspond à :
+\begin{equation}
+  m * a_t = m * G + Fk(p_t)
+\end{equation}
+où $G$ correspond à la valeur de la gravité (en général 9,81) et $m$ correspond à la masse de l'objet. $Fk$ correspond à une fonction qui calcule la force générée par les ressorts à partir de la position.
+
+L'accélération du point à l'instant t correspond également à :
+\begin{equation}
+  a_t = \frac{dv}{dt} = v_t - v_{t-1}
+\end{equation}
+où $dv =$ variable commune liant l'accélération et la position, $dt =$ pas de temps, $v_t =$ vitesse du point à l'instant t, $v_{t-1} =$ vitesse du point à l'instant t-1,.
+
+La position du point à l'instant t correspond également à :
+\begin{equation}
+  p_t = p_{t-1} + v_{t-1} + dv
+\end{equation}
+où $p_{t-1} =$ position du point à l'instant t-1, $v_{t-1} =$ vitesse du point à l'instant t-1, $dv =$ variable commune liant l'accélération et la position.
+
+On dispose donc d'une fonction non-linéaire :
+\begin{equation}
+  Fnl(dv) = \frac{m * dv}{dt} - m * G - Fk( p_{t-1} + v_{t-1} + dv )
+\end{equation}
+où $m$ correspond à la masse de l'objet, $dv =$ variable commune liant l'accélération et la position, $dt =$ pas de temps, $G$ correspond à la valeur de la gravité (en général 9,81), $Fk$ correspond à une fonction qui calcule la force générée par les ressorts à partir de la position, $p_{t-1} =$ position du point à l'instant t-1, $v_{t-1} =$ vitesse du point à l'instant t-1.
+
+Pour résoudre cette équation, il faut utiliser un solveur.
+\begin{equation}
+  dv = fsolve(dv_0, Fnl)
+\end{equation}
+où fsolve implémente le solveur (dans Scilab), $dv_0$ représente une première estimation de dv, et $Fnl$ correspond à la fonction non-linéaire trouvée plus haut.
+
+\subsection{Observations}
+
+On utilise un solveur pour résoudre l'équation non-linéaire $Fnl$.
+Par conséquent, l'équation prend plus de temps à résoudre.\\
+Il faut donc sacrifier les performances afin d'avoir un système plus stable.\\
+
+Le choix du pas de temps influence donc peu sur le résultat. De même une modification de la raideur n'a pas d'impact sur la stabilité du système.
+
+%----------------------------------------------------------------------------------------
+\section{Gestion des contacts}
+
 
 \end{document}
