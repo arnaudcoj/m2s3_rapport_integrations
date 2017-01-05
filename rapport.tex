@@ -188,5 +188,32 @@ Le choix du pas de temps influence donc peu sur le résultat. De même une modif
 %----------------------------------------------------------------------------------------
 \section{Gestion des contacts}
 
+On veut implémenter une réponse à la collision entre un objet en chute libre et un plan représentant une surface rigide et statique.
+
+Une implémentation possible est celle de la méthode de pénalité. Cette méthode est utilisable avec les intégrations implicites et explicites.
+
+Une pénalité correspond à une force appliquée sur un objet pour le repousser, lorsqu'une collision est détectée (dépassement du plan dans notre cas).
+
+\subsection{Pénalités}
+
+On calcule la masse du disque calculée, puis on applique la force de gravité sur celui-ci.
+Une fois que l'on détecte que l'objet dépasse le plan, on ajoute la force de pénalité :
+\begin{equation}
+  Pe = -k * distance(p_X, plan_X)
+\end{equation}
+où $k$ correspond au coefficient de résistance du ressort, $p_X$ correspond à la position du point X, et $plan_X$ correspond à la projection orthogonale du point X sur le plan.
+
+Pour éviter à l'objet de rebondir de façon infinie, on ajoute à cette force un amortissement :
+\begin{equation}
+  Pe = -k * distance(p_X, plan_X) - b * v_{t-1}
+\end{equation}
+où $b$ correspond au coefficient de frottement, et $v_{t-1}$ correspond à la vitesse du point à l'instant t-1.
+
+Cette force sera ajoutée aux forces utilisées dans les intégrations vues précédemments.
+
+\subsection{Observations}
+
+On constate que le disque rebondit sur le plan comme prévu.\\
+Lorsque l'on augmente le coefficient d'amortissement, le disque rebondit moins haut, et inversement.
 
 \end{document}
